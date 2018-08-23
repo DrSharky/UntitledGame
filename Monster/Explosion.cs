@@ -10,13 +10,8 @@ public class Explosion : MonoBehaviour
 	void Start()
 	{
         explosionSfx = GetComponent<AudioSource>();
-	}
-	
-	// Update is called once per frame
-	void Update()
-	{
         StartCoroutine(WaitForDeath());
-	}
+    }
 
     IEnumerator WaitForDeath()
     {
