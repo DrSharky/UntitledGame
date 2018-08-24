@@ -19,7 +19,7 @@ public class SkullAttack : MonoBehaviour
     private NavMeshAgent agent;
     private Vector3 shootDirection;
 
-    private const float shootCooldown = 2.0f;
+    public float shootCooldown = 2.0f;
 
 
 
@@ -102,10 +102,8 @@ public class SkullAttack : MonoBehaviour
     private void ShootFireBall(Vector3 shootDir)
     {
         GameObject fireball = Instantiate(projectile, transform.position + (transform.forward), Quaternion.identity);
-        //fireball.GetComponent<Rigidbody>().AddForce(shootDir * 10);
         fireball.GetComponent<Rigidbody>().velocity = shootDir * 10;
         fireball.transform.right = -shootDir;
-        //fireball.transform.Rotate(new Vector3(90, 0, 0));
         cooldownWait = true;
         StartCoroutine(StartCooldown());
     }
@@ -117,7 +115,6 @@ public class SkullAttack : MonoBehaviour
     }
 
     //Linked to event in WanderingAI Script.
-
     public void OnStartChase()
     {
         chasing = true;

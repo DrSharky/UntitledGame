@@ -18,6 +18,29 @@ public class SkelExplode : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    private void SeparateChildren(GameObject bone, List<GameObject> bones)
+    {
+        for(int i = 0; i < bone.transform.childCount; i++)
+        {
+            GameObject child = bone.transform.GetChild(i).gameObject;
+            if (child.name == "upperLeg.L" || child.name == "upperLeg.R")
+                break;
+            child.GetComponent<Collider>().enabled = true;
+            Rigidbody childRB = child.GetComponent<Rigidbody>();
+            childRB.mass = 1.0f;
+            childRB.angularDrag = 0.05f;
+            childRB.useGravity = true;
+            bones.Add(child);
+            if (bone.name == "Spine3")
+                continue;
+            SeparateChildren(child, bones);
+        }
+        if (bone.name != "hips")
+            bone.transform.DetachChildren();
+        else
+            bone.transform.GetChild(0).parent = null;
+    }
+
     public void Boom()
     {
         explode = new UnityEvent();
@@ -25,58 +48,25 @@ public class SkelExplode : MonoBehaviour
         explode.AddListener(attackScript.Boom);
         explode.Invoke();
 
-        GameObject[] bones = new GameObject[7];
-        for (int i = 0; i < gameObject.transform.childCount; i++)
-        {
-            GameObject child = transform.GetChild(i).gameObject;
-            child.transform.position = transform.position;
-            Rigidbody childRB = child.GetComponent<Rigidbody>();
-            childRB.mass = 1.0f;
-            childRB.angularDrag = 0.05f;
-            childRB.useGravity = true;
-            bones[i] = child;
-        }
+        List<GameObject> bones = new List<GameObject>();
+
+        SeparateChildren(gameObject, bones);
+        gameObject.GetComponent<Collider>().enabled = true;
         rb.mass = 1.0f;
         rb.angularDrag = 0.05f;
         rb.useGravity = true;
-
-        GameObject spine1 = transform.parent.parent.gameObject;
-        GameObject legL = spine1.transform.parent.GetChild(0).gameObject;
-        GameObject legR = spine1.transform.parent.GetChild(1).gameObject;
-        Rigidbody legLRB = legL.GetComponent<Rigidbody>();
-        Rigidbody legRRB = legR.GetComponent<Rigidbody>();
-        Rigidbody spine1RB = transform.parent.parent.GetComponent<Rigidbody>();
-        spine1RB.mass = 1.0f;
-        spine1RB.angularDrag = 0.05f;
-        spine1RB.useGravity = true;
-        bones[3] = spine1;
-        legLRB.mass = 1.0f;
-        legLRB.angularDrag = 0.05f;
-        legLRB.useGravity = true;
-        bones[4] = legL;
-        legRRB.mass = 1.0f;
-        legRRB.angularDrag = 0.05f;
-        legRRB.useGravity = true;
-        bones[5] = legR;
-        Rigidbody spine2RB = transform.parent.gameObject.GetComponent<Rigidbody>();
-        spine2RB.mass = 1.0f;
-        spine2RB.angularDrag = 0.05f;
-        spine2RB.useGravity = true;
-        bones[6] = transform.parent.gameObject;
-        transform.parent.DetachChildren();
-        gameObject.transform.DetachChildren();
-        spine1.transform.DetachChildren();
-        spine1.transform.parent.DetachChildren();
         StartCoroutine(Cleanup(bones));
     }
 
-    IEnumerator Cleanup(GameObject[] bones)
+    IEnumerator Cleanup(List<GameObject> bones)
     {
         yield return new WaitForSeconds(3.0f);
         foreach(GameObject bone in bones)
         {
             Destroy(bone);
         }
-        Destroy(gameObject);
+
+        GameObject skeleton = transform.parent.parent.gameObject;
+        Destroy(skeleton);
     }
 }

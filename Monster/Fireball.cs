@@ -36,15 +36,15 @@ public class Fireball : MonoBehaviour
                 explodeSkeleton.AddListener(collision.collider.GetComponentInChildren<SkelExplode>().Boom);
                 explodeSkeleton.Invoke();
             }
-            else if(collision.collider.tag == "Skele")
-            {
-                explodeSkeleton = new UnityEvent();
-                if(collision.collider.name == "Spine3")
-                    explodeSkeleton.AddListener(collision.collider.GetComponent<SkelExplode>().Boom);
-                else
-                    explodeSkeleton.AddListener(collision.collider.GetComponentInParent<SkelExplode>().Boom);
-                explodeSkeleton.Invoke();
-            }
+            //else if(collision.collider.tag == "Skele")
+            //{
+            //    explodeSkeleton = new UnityEvent();
+            //    if(collision.collider.name == "Spine3")
+            //        explodeSkeleton.AddListener(collision.collider.GetComponent<SkelExplode>().Boom);
+            //    else
+            //        explodeSkeleton.AddListener(collision.collider.GetComponentInParent<SkelExplode>().Boom);
+            //    explodeSkeleton.Invoke();
+            //}
         }
         Destroy(gameObject);
     }
