@@ -7,35 +7,20 @@ public class PlayerWeapon : MonoBehaviour
     public List<GameObject> weapons;
 
     private int currentWeapon;
-    public string[] acquiredWeapons;
+    public List<GameObject> acquiredWeapons;
 
     private void Start()
     {
-        acquiredWeapons = new string[3];
+        acquiredWeapons = new List<GameObject>();
     }
 
-    public void GiveWeapon(string weaponType)
+    public void GiveWeapon(GameObject weapon)
     {
-
-        switch (weaponType)
+        if (weapons[weapons.IndexOf(weapon)] != null)
         {
-            case "Leg":
-                weapons[0].SetActive(true);
-                currentWeapon = 0;
-                acquiredWeapons[0] = weaponType;
-                break;
-            case "Fireball":
-                weapons[1].SetActive(true);
-                currentWeapon = 1;
-                acquiredWeapons[1] = weaponType;
-                break;
-            case "Torch":
-                weapons[2].SetActive(true);
-                currentWeapon = 2;
-                acquiredWeapons[2] = weaponType;
-                break;
-            default:
-                break;
+            weapons[weapons.IndexOf(weapon)].SetActive(true);
+            currentWeapon = weapons.IndexOf(weapon);
+            acquiredWeapons.Add(weapon);
         }
     }
 
@@ -43,17 +28,23 @@ public class PlayerWeapon : MonoBehaviour
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
-            if (currentWeapon == weapons.Count - 1)
-                SetActiveWeapon(weapons[0]);
+            if (acquiredWeapons.Count <= 1)
+                return;
+
+            if (currentWeapon == acquiredWeapons.Count - 1)
+                SetActiveWeapon(acquiredWeapons[0]);
             else
-                SetActiveWeapon(weapons[currentWeapon + 1]);
+                SetActiveWeapon(acquiredWeapons[currentWeapon + 1]);
         }
         if(Input.GetAxis("Mouse ScrollWheel") < 0)
         {
+            if (acquiredWeapons.Count <= 1)
+                return;
+
             if (currentWeapon == 0)
-                SetActiveWeapon(weapons[weapons.Count - 1]);
+                SetActiveWeapon(acquiredWeapons[acquiredWeapons.Count - 1]);
             else
-                SetActiveWeapon(weapons[currentWeapon - 1]);
+                SetActiveWeapon(acquiredWeapons[currentWeapon - 1]);
         }
     }
 
