@@ -7,7 +7,7 @@ public class PlayerWeapon : MonoBehaviour
     public List<GameObject> weapons;
 
     private int currentWeapon;
-    public List<GameObject> acquiredWeapons;
+    private List<GameObject> acquiredWeapons;
 
     private void Start()
     {
