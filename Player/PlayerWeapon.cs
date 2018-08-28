@@ -15,12 +15,11 @@ public class PlayerWeapon : MonoBehaviour
     private bool cooldownWait = false;
     [SerializeField]
     private GameObject fireballProjectile;
+    private List<GameObject> acquiredWeapons;
 
     private void Start()
     {
         acquiredWeapons = new List<GameObject>();
-        //DEBUG LINE::
-        currentWeapon = 0;
     }
 
     public void GiveWeapon(GameObject weapon)
