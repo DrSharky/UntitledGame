@@ -21,7 +21,7 @@ public class WanderingAI : MonoBehaviour
     private UnityEvent chaseEvent;
     //private PlayerHealth playerHealth;
     private MonsterAttack attackScript;
-    private SkelExplode explodeScript;
+    private SkeletonExplode explodeScript;
 
     //Standard Asset adapting stuff
     private float turnAmt;
@@ -61,7 +61,7 @@ public class WanderingAI : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         //agent.enabled = false;
         StartCoroutine(WaitForSpawn());
-        explodeScript = transform.GetComponentInChildren<SkelExplode>();
+        explodeScript = transform.GetComponentInChildren<SkeletonExplode>();
     }
 
     // Use this for initialization

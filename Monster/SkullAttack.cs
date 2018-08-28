@@ -74,7 +74,7 @@ public class SkullAttack : MonoBehaviour
 
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
-        Physics.Raycast(ray, out hit, 10);
+        Physics.Raycast(ray, out hit);
 
         shootDirection = (player.transform.position - transform.position).normalized;
         if (hit.collider == null)
