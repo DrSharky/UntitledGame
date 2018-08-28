@@ -15,11 +15,11 @@ public class PlayerWeapon : MonoBehaviour
     private bool cooldownWait = false;
     [SerializeField]
     private GameObject fireballProjectile;
-    private List<GameObject> acquiredWeapons;
 
     private void Start()
     {
         acquiredWeapons = new List<GameObject>();
+        currentWeapon = -1;
     }
 
     public void GiveWeapon(GameObject weapon)
@@ -58,7 +58,7 @@ public class PlayerWeapon : MonoBehaviour
             else
                 SetActiveWeapon(acquiredWeapons[currentWeapon - 1]);
         }
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && currentWeapon > -1)
         {
             Attack();
         }
@@ -77,18 +77,35 @@ public class PlayerWeapon : MonoBehaviour
 
     private void Attack()
     {
-        if (currentAnim != null)
-            currentAnim.Play("Attack");
+        GameObject camera = transform.GetChild(0).gameObject;
 
-        if(acquiredWeapons[currentWeapon].name == "Fireball" && !cooldownWait)
+        if (acquiredWeapons[currentWeapon].name == "Fireball" && !cooldownWait)
         {
-            GameObject camera = transform.GetChild(0).gameObject;
             GameObject fireball = Instantiate(fireballProjectile, camera.transform.position + (camera.transform.forward), Quaternion.identity);
+            acquiredWeapons[currentWeapon].SetActive(false);
             fireball.GetComponent<Rigidbody>().velocity = camera.transform.forward * 10;
             fireball.transform.right = -transform.forward;
             cooldownWait = true;
             StartCoroutine(StartCooldown());
         }
+        else if (currentAnim != null && !cooldownWait)
+        {
+            currentAnim.Play("Attack");
+            
+            Ray ray = new Ray(camera.transform.position, camera.transform.forward);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 2.65f))
+            {
+                Debug.DrawRay(hit.point, hit.normal, Color.yellow, 20.0f);
+                SkullAttack skullScript = hit.transform.gameObject.GetComponent<SkullAttack>();
+                if (skullScript != null)
+                    skullScript.TakeDamage();
+            }
+            cooldownWait = true;
+            StartCoroutine(StartCooldown());
+        }
+        else
+            return;
     }
 
     IEnumerator StartCooldown()
@@ -96,5 +113,6 @@ public class PlayerWeapon : MonoBehaviour
         cooldownWait = true;
         yield return new WaitForSeconds(shootCooldown);
         cooldownWait = false;
+        acquiredWeapons[currentWeapon].SetActive(true);
     }
 }

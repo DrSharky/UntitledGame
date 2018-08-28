@@ -59,7 +59,6 @@ public class WanderingAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
-        //agent.enabled = false;
         StartCoroutine(WaitForSpawn());
         explodeScript = transform.GetComponentInChildren<SkeletonExplode>();
     }

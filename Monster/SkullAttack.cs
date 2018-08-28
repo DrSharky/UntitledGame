@@ -7,10 +7,13 @@ public class SkullAttack : MonoBehaviour
 {
     public GameObject player;
     public GameObject projectile;
+    public GameObject deathExplosion;
+    public GameObject fireballPickup;
+    public float shootCooldown = 2.0f;
+    public bool attacking = false;
 
     private Animator anim;
     private PlayerHealth playerHealth;
-    //private MonsterHealth monsterHealth;
     private bool inRange = false;
     private bool chasing = false;
     private bool endState = false;
@@ -18,19 +21,13 @@ public class SkullAttack : MonoBehaviour
     private bool cooldownWait = false;
     private NavMeshAgent agent;
     private Vector3 shootDirection;
-
-    public float shootCooldown = 2.0f;
-
-
-
-    public bool attacking = false;
+    private int monsterHealth = 90;
 
     // Use this for initialization
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
         playerHealth = player.GetComponent<PlayerHealth>();
-        //monsterHealth = GetComponent<MonsterHealth>();
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         shootDirection = transform.forward;
@@ -39,7 +36,7 @@ public class SkullAttack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //first check if skeleton is chasing, then check distance.
+        //first check if skull is chasing, then check distance.
         if (chasing && playerHealth.health > 0)
         {
             distanceToPlayer = Vector3.Distance(player.transform.position, transform.position);
@@ -60,9 +57,6 @@ public class SkullAttack : MonoBehaviour
             anim.SetBool("PlayerDead", true);
     }
 
-
-    //Could use some work
-    //Improvements: Add smoothing instead of agent.isStopped = true / false.
     private void Attack()
     {
         if (!chasing || endState)
@@ -70,7 +64,6 @@ public class SkullAttack : MonoBehaviour
 
         attacking = true;
         Rigidbody rb = GetComponent<Rigidbody>();
-        //agent.isStopped = true;
 
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
@@ -96,7 +89,6 @@ public class SkullAttack : MonoBehaviour
 
         else if(!cooldownWait && hit.collider.tag == "Player")
             ShootFireBall(shootDirection);
-
     }
 
     private void ShootFireBall(Vector3 shootDir)
@@ -123,5 +115,20 @@ public class SkullAttack : MonoBehaviour
     public void PlayerIsDead()
     {
         endState = true;
+    }
+
+    public void TakeDamage()
+    {
+        if(monsterHealth > 0)
+            monsterHealth -= 30;
+        else
+            Death();
+    }
+
+    private void Death()
+    {
+        Instantiate(deathExplosion, transform.position, transform.rotation);
+        Instantiate(fireballPickup, transform.position, transform.rotation);
+        Destroy(gameObject);
     }
 }

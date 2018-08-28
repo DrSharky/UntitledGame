@@ -5,7 +5,13 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
-.meta
+*.meta
+*.gitignore
+.gitignore
+LocalNavMeshBuilder.cs
+NavMeshSourceTag.cs
+HeadBob.cs
+MouseLook.cs
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
