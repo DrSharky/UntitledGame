@@ -22,4 +22,12 @@ public class WeaponPickup : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    private void Update()
+    {
+        if(transform.position.y < -200.0f)
+        {
+            Destroy(gameObject);
+        }
+    }
 }

@@ -13,8 +13,11 @@ public class PlayerWeapon : MonoBehaviour
     private Animator currentAnim;
     private float shootCooldown = 1.0f;
     private bool cooldownWait = false;
+    private bool swingCooldownWait = false;
+    private float swingCooldown = 0.1f;
     [SerializeField]
     private GameObject fireballProjectile;
+    private bool mouseButtonUp = true;
 
     private void Start()
     {
@@ -27,8 +30,11 @@ public class PlayerWeapon : MonoBehaviour
         GameObject weaponInList = weapons.Where(x => x.name == weapon.name).FirstOrDefault();
         if (weaponInList != null)
         {
-            acquiredWeapons.Add(weaponInList);
-            SetActiveWeapon(weaponInList);
+            if (acquiredWeapons.Where(x => x.name == weapon.name).FirstOrDefault() == null)
+            {
+                acquiredWeapons.Add(weaponInList);
+                SetActiveWeapon(weaponInList);
+            }
         }
         else
         {
@@ -58,10 +64,13 @@ public class PlayerWeapon : MonoBehaviour
             else
                 SetActiveWeapon(acquiredWeapons[currentWeapon - 1]);
         }
-        if (Input.GetMouseButton(0) && currentWeapon > -1)
+        if (Input.GetMouseButton(0) && currentWeapon > -1 && mouseButtonUp)
         {
+            mouseButtonUp = false;
             Attack();
         }
+        if (Input.GetMouseButtonUp(0))
+            mouseButtonUp = true;
     }
 
     private void SetActiveWeapon(GameObject weapon)
@@ -85,10 +94,9 @@ public class PlayerWeapon : MonoBehaviour
             acquiredWeapons[currentWeapon].SetActive(false);
             fireball.GetComponent<Rigidbody>().velocity = camera.transform.forward * 10;
             fireball.transform.right = -transform.forward;
-            cooldownWait = true;
             StartCoroutine(StartCooldown());
         }
-        else if (currentAnim != null && !cooldownWait)
+        else if (currentAnim != null && !swingCooldownWait)
         {
             currentAnim.Play("Attack");
             
@@ -101,8 +109,7 @@ public class PlayerWeapon : MonoBehaviour
                 if (skullScript != null)
                     skullScript.TakeDamage();
             }
-            cooldownWait = true;
-            StartCoroutine(StartCooldown());
+            StartCoroutine(SwingCooldown());
         }
         else
             return;
@@ -114,5 +121,12 @@ public class PlayerWeapon : MonoBehaviour
         yield return new WaitForSeconds(shootCooldown);
         cooldownWait = false;
         acquiredWeapons[currentWeapon].SetActive(true);
+    }
+
+    IEnumerator SwingCooldown()
+    {
+        swingCooldownWait = true;
+        yield return new WaitForSeconds(swingCooldown);
+        swingCooldownWait = false;
     }
 }
