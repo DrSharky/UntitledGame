@@ -46,6 +46,9 @@ public class PlayerAudio : MonoBehaviour
                 audioWalk.pitch = 1.5f;
                 playRun = StartCoroutine(PlayRun());
             }
+            else
+                audioWalk.pitch = 1.2f;
+
             if(rb.velocity.magnitude < 2f)
             {
                 if(playWalk != null)
