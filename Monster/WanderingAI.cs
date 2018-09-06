@@ -19,7 +19,6 @@ public class WanderingAI : MonoBehaviour
     private Animator anim;
 
     private UnityEvent chaseEvent;
-    //private PlayerHealth playerHealth;
     private MonsterAttack attackScript;
     private SkeletonExplode explodeScript;
 

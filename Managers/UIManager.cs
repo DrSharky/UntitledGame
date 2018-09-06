@@ -8,9 +8,20 @@ public class UIManager : MonoBehaviour
     public static UIManager instance = null;
 
     public Text speedText;
-    public GameObject[] levelEndObjects = new GameObject[5];
-    public GameObject[] gameOverObjects = new GameObject[5];
+    public GameObject levelEndObject;
+    public GameObject gameOverObject;
 
+    public string[] skeletonText = new string[4];
+
+    [SerializeField]
+    private GameObject dialoguePanel;
+    [SerializeField]
+    public GameObject dialogueText;
+    [SerializeField]
+    private GameObject playerHealth;
+
+    private string dialogueType;
+    private int dialogueIndex = 0;
     private int speedMulti = 0;
 
 	// Use this for initialization
@@ -21,12 +32,48 @@ public class UIManager : MonoBehaviour
         else if (instance != this)
             Destroy(gameObject);
 	}
-	
-	// Update is called once per frame
-	void Update()
-	{
-		
-	}
+
+    public void DisplayDialoguePanel(string type)
+    {
+        dialogueType = type;
+        playerHealth.SetActive(false);
+        dialoguePanel.SetActive(true);
+    }
+
+    private void Update()
+    {
+        if(dialogueText.activeInHierarchy)
+        {
+            if (Input.GetKeyUp(KeyCode.E))
+            {
+                if (dialogueIndex < 4)
+                {
+                    if (dialogueType == "ChillSkeleton")
+                    {
+                        NextDialogueLine(skeletonText[dialogueIndex]);
+                        dialogueIndex++;
+                    }
+                    else if (dialogueType == "RatKing")
+                    {
+                        //TO-DO
+                    }
+                }
+                else
+                    ClearDialoguePanel();
+            }
+        }
+    }
+
+    void NextDialogueLine(string nextLine)
+    {
+        dialogueText.GetComponent<Text>().text = nextLine;
+    }
+
+    void ClearDialoguePanel()
+    {
+        playerHealth.SetActive(true);
+        dialoguePanel.SetActive(false);
+    }
 
     public void OnSpeedPickup()
     {
@@ -36,19 +83,11 @@ public class UIManager : MonoBehaviour
 
     public void OnLevelEnd()
     {
-        for(int i = 0; i < levelEndObjects.Length; i++)
-        {
-            if(levelEndObjects[i] != null)
-                levelEndObjects[i].SetActive(true);
-        }
+        levelEndObject.SetActive(true);
     }
 
     public void OnGameOver()
     {
-        for(int i = 0; i < gameOverObjects.Length; i++)
-        {
-            if (gameOverObjects[i] != null)
-                gameOverObjects[i].SetActive(true);
-        }
+        gameOverObject.SetActive(true);
     }
 }
