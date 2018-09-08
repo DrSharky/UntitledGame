@@ -6,8 +6,15 @@ using UnityEngine.Events;
 
 public class PlayerWeapon : MonoBehaviour
 {
+
+    //DEV VAR REMOVE ON BUILD
+    public bool debug = true;
+    //DEV VAR REMOVE ON BUILD
+
     public List<GameObject> weapons;
     public List<GameObject> acquiredWeapons;
+
+    public GameObject sunglasses;
 
     private int currentWeapon;
     private Animator currentAnim;
@@ -18,11 +25,18 @@ public class PlayerWeapon : MonoBehaviour
     [SerializeField]
     private GameObject fireballProjectile;
     private bool mouseButtonUp = true;
+    private bool gotSunglasses = false;
 
     private void Start()
     {
         acquiredWeapons = new List<GameObject>();
-        currentWeapon = -1;
+        if (debug)
+        {
+            currentWeapon = 0;
+            acquiredWeapons.Add(GameObject.FindGameObjectWithTag("Fireball"));
+        }
+        else
+            currentWeapon = -1;
     }
 
     public void GiveWeapon(GameObject weapon)
@@ -71,6 +85,19 @@ public class PlayerWeapon : MonoBehaviour
         }
         if (Input.GetMouseButtonUp(0))
             mouseButtonUp = true;
+
+        if (Input.GetKeyDown(KeyCode.Q) && gotSunglasses)
+        {
+            if (sunglasses.activeInHierarchy)
+                sunglasses.SetActive(false);
+            else
+                sunglasses.SetActive(true);
+        }
+        if (UIManager.initSun)
+        {
+            sunglasses.SetActive(true);
+            UIManager.initSun = false;
+        }
     }
 
     private void SetActiveWeapon(GameObject weapon)

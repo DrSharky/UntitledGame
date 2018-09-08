@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class UIManager : MonoBehaviour
 {
@@ -24,6 +25,19 @@ public class UIManager : MonoBehaviour
     private int dialogueIndex = 0;
     private int speedMulti = 0;
 
+    private Rigidbody playerRb;
+    private Transform playerCam;
+    private UnityEvent sunglassesEvent;
+
+    public static bool sunglasses = false;
+    public static bool initSun = false;
+
+    public static void sunglassesEventFired()
+    {
+        sunglasses = true;
+        initSun = true;
+    }
+
 	// Use this for initialization
 	void Start()
 	{
@@ -31,6 +45,11 @@ public class UIManager : MonoBehaviour
             instance = this;
         else if (instance != this)
             Destroy(gameObject);
+
+        playerRb = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
+        if (sunglassesEvent == null)
+            sunglassesEvent = new UnityEvent();
+        sunglassesEvent.AddListener(sunglassesEventFired);
 	}
 
     public void DisplayDialoguePanel(string type)
@@ -44,14 +63,21 @@ public class UIManager : MonoBehaviour
     {
         if(dialogueText.activeInHierarchy)
         {
+            playerRb.constraints = RigidbodyConstraints.FreezePosition;
             if (Input.GetKeyUp(KeyCode.E))
             {
-                if (dialogueIndex < 4)
+                if (dialogueIndex < skeletonText.Length)
                 {
                     if (dialogueType == "ChillSkeleton")
                     {
                         NextDialogueLine(skeletonText[dialogueIndex]);
                         dialogueIndex++;
+
+                        if(dialogueIndex == 3)
+                        {
+                            sunglassesEvent.Invoke();
+                        }
+
                     }
                     else if (dialogueType == "RatKing")
                     {
@@ -59,7 +85,11 @@ public class UIManager : MonoBehaviour
                     }
                 }
                 else
+                {
                     ClearDialoguePanel();
+                    dialogueIndex = 0;
+                    playerRb.constraints = RigidbodyConstraints.FreezeRotation;
+                }
             }
         }
     }

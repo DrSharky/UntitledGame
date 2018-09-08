@@ -43,7 +43,7 @@ public class ChillSkeletonDialogueScript : MonoBehaviour
             newHead.rotation = Quaternion.LookRotation(newDir);
         }
 
-		if(Input.GetKeyUp(KeyCode.E))
+        if (Input.GetKeyUp(KeyCode.E))
             StartDialogue();
 	}
 
