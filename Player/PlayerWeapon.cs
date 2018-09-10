@@ -86,7 +86,7 @@ public class PlayerWeapon : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
             mouseButtonUp = true;
 
-        if (Input.GetKeyDown(KeyCode.Q) && gotSunglasses)
+        if (Input.GetKeyDown(KeyCode.Q) && UIManager.sunglasses)
         {
             if (sunglasses.activeInHierarchy)
                 sunglasses.SetActive(false);

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ChillSkeletonDialogueScript : MonoBehaviour
 {
@@ -16,10 +17,20 @@ public class ChillSkeletonDialogueScript : MonoBehaviour
 
     private UIManager ui;
     private bool lookAt = false;
+    private bool endConvo = false;
+
+    private UnityAction explodeListener;
 
     private void Start()
     {
         ui = GameObject.FindGameObjectWithTag("Canvas").GetComponent<UIManager>();
+        explodeListener = new UnityAction(Explode);
+        EventManager.StartListening("explode" + chillSkeleton.GetInstanceID(), explodeListener);
+    }
+
+    void Explode()
+    {
+        Destroy(gameObject);
     }
 
     // Update is called once per frame
@@ -43,8 +54,11 @@ public class ChillSkeletonDialogueScript : MonoBehaviour
             newHead.rotation = Quaternion.LookRotation(newDir);
         }
 
-        if (Input.GetKeyUp(KeyCode.E))
+        if (Input.GetKeyUp(KeyCode.E) && lookAt && !endConvo)
+        {
             StartDialogue();
+            endConvo = true;
+        }
 	}
 
     void StartDialogue()

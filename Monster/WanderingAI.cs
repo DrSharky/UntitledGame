@@ -9,18 +9,17 @@ public class WanderingAI : MonoBehaviour
     public float wanderRadius;
     public float wanderTimer;
     public GameObject player;
+    public GameObject playerGlasses;
 
-    private NavMeshAgent agent;
     private float timer;
     private bool chasing = false;
     private bool frozen = true;
     private bool endState = false;
+    private NavMeshAgent agent;
     private Rigidbody rb;
     private Animator anim;
 
-    private UnityEvent chaseEvent;
-    private MonsterAttack attackScript;
-    private SkeletonExplode explodeScript;
+    private UnityAction explodeListener;
 
     //Standard Asset adapting stuff
     private float turnAmt;
@@ -29,14 +28,8 @@ public class WanderingAI : MonoBehaviour
     float m_MovingTurnSpeed = 360;
     [SerializeField]
     float m_StationaryTurnSpeed = 180;
-    [SerializeField]
-    float m_MoveSpeedMultiplier = 1f;
 
     Vector3 m_GroundNormal;
-
-    private void Start()
-    {
-    }
 
     public void Boom()
     {
@@ -59,7 +52,7 @@ public class WanderingAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         StartCoroutine(WaitForSpawn());
-        explodeScript = transform.GetComponentInChildren<SkeletonExplode>();
+        explodeListener = new UnityAction(Boom);
     }
 
     // Use this for initialization
@@ -67,18 +60,14 @@ public class WanderingAI : MonoBehaviour
     {
         timer = wanderTimer;
         player = GameObject.FindGameObjectWithTag("Player");
+        playerGlasses = player.transform.GetChild(0).GetChild(3).gameObject;
         anim = GetComponent<Animator>();
         m_GroundNormal = new Vector3(0, 1, 0);
 
         agent.updateRotation = false;
         agent.updatePosition = true;
 
-        if (chaseEvent == null)
-            chaseEvent = new UnityEvent();
-
-        attackScript = GetComponent<MonsterAttack>();
-
-        chaseEvent.AddListener(attackScript.OnStartChase);
+        EventManager.StartListening("explode" + gameObject.GetInstanceID(), explodeListener);
     }
 
     private IEnumerator WaitForSpawn()
@@ -97,7 +86,7 @@ public class WanderingAI : MonoBehaviour
 
         timer += Time.deltaTime;
 
-        if (timer >= wanderTimer && !chasing)
+        if (timer >= wanderTimer)
         {
             Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
 
@@ -105,7 +94,7 @@ public class WanderingAI : MonoBehaviour
             timer = 0;
 
         }
-        else if (chasing)
+        else if (chasing && !playerGlasses.activeInHierarchy)
         {
             agent.SetDestination(player.transform.position - ((player.transform.position - transform.position).normalized*2));
         }
@@ -131,7 +120,7 @@ public class WanderingAI : MonoBehaviour
         move = transform.InverseTransformDirection(move);
         move = Vector3.ProjectOnPlane(move, m_GroundNormal);
         turnAmt = Mathf.Atan2(move.x, move.z);
-        if (chasing)
+        if (chasing && !playerGlasses.activeInHierarchy)
             forwardAmt = move.z;
         else
             forwardAmt = move.z * 0.5f;
@@ -153,11 +142,8 @@ public class WanderingAI : MonoBehaviour
     public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask)
     {
         Vector3 randDirection = Random.insideUnitSphere * dist;
-
         randDirection += origin;
-
         NavMeshHit navHit;
-
         NavMesh.SamplePosition(randDirection, out navHit, dist, layermask);
 
         return navHit.position;
@@ -168,7 +154,7 @@ public class WanderingAI : MonoBehaviour
         if (other.tag == "Player")
         {
             chasing = true;
-            chaseEvent.Invoke();
+            EventManager.TriggerEvent("chase" + gameObject.GetInstanceID());
         }
     }
 
@@ -184,26 +170,26 @@ public class WanderingAI : MonoBehaviour
         endState = true;
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        Color debugColor;
-        if (collision.collider.tag == "Monster")
-        {
-            debugColor = Color.blue;
-            foreach(ContactPoint contact in collision.contacts)
-            {
-                Debug.DrawRay(contact.point, contact.normal, debugColor, 5);
-            }
-            rb.velocity = new Vector3(0, 0, 0);
-        }
-        if (collision.collider.tag == "Player")
-        {
-            debugColor = Color.green;
-            foreach (ContactPoint contact in collision.contacts)
-            {
-                Debug.DrawRay(contact.point, contact.normal, debugColor, 5);
-            }
-            rb.velocity = new Vector3(0, 0, 0);
-        }
-    }
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    Color debugColor;
+    //    if (collision.collider.tag == "Monster")
+    //    {
+    //        debugColor = Color.blue;
+    //        foreach(ContactPoint contact in collision.contacts)
+    //        {
+    //            Debug.DrawRay(contact.point, contact.normal, debugColor, 5);
+    //        }
+    //        rb.velocity = new Vector3(0, 0, 0);
+    //    }
+    //    if (collision.collider.tag == "Player")
+    //    {
+    //        debugColor = Color.green;
+    //        foreach (ContactPoint contact in collision.contacts)
+    //        {
+    //            Debug.DrawRay(contact.point, contact.normal, debugColor, 5);
+    //        }
+    //        rb.velocity = new Vector3(0, 0, 0);
+    //    }
+    //}
 }

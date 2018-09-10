@@ -11,6 +11,18 @@ public class SkeletonExplode : MonoBehaviour
     private WanderingAI wanderScript;
     private Rigidbody rb;
 
+    private UnityAction explodeListener;
+
+    private void Awake()
+    {
+        explodeListener = new UnityAction(Boom);
+    }
+
+    private void OnEnable()
+    {
+        EventManager.StartListening("explode" + gameObject.transform.parent.parent.gameObject.GetInstanceID(), explodeListener);
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -44,11 +56,6 @@ public class SkeletonExplode : MonoBehaviour
 
     public void Boom()
     {
-        explode = new UnityEvent();
-        explode.AddListener(wanderScript.Boom);
-        explode.AddListener(attackScript.Boom);
-        explode.Invoke();
-
         List<GameObject> bones = new List<GameObject>();
 
         SeparateChildren(gameObject, bones);

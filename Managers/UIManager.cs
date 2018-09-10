@@ -73,7 +73,7 @@ public class UIManager : MonoBehaviour
                         NextDialogueLine(skeletonText[dialogueIndex]);
                         dialogueIndex++;
 
-                        if(dialogueIndex == 3)
+                        if(dialogueIndex == 4)
                         {
                             sunglassesEvent.Invoke();
                         }

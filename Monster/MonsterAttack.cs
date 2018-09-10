@@ -2,27 +2,43 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class MonsterAttack : MonoBehaviour
 {
+    public bool attacking = false;
     public int damage = 10;
     public GameObject player;
-    private PlayerAudio playerAudio;
+    public GameObject playerGlasses;
 
-    private Animator anim;
-    private PlayerHealth playerHealth;
-    //private MonsterHealth monsterHealth;
     private bool inRange = false;
     private bool chasing = false;
     private bool endState = false;
     private float distanceToPlayer = 0.0f;
+    private PlayerAudio playerAudio;
+    private Animator anim;
+    private PlayerHealth playerHealth;
     private NavMeshAgent agent;
+    //private MonsterHealth monsterHealth;
+
+    private int instanceID;
+    private UnityAction explodeListener;
+    private UnityAction chaseListener;
 
     private Coroutine playDamage = null;
 
+    private void Awake()
+    {
+        instanceID = gameObject.GetInstanceID();
+        explodeListener = new UnityAction(Boom);
+        chaseListener = new UnityAction(OnStartChase);
+    }
 
-
-    public bool attacking = false;
+    private void OnEnable()
+    {
+        EventManager.StartListening("explode" + instanceID, explodeListener);
+        EventManager.StartListening("chase" + instanceID, chaseListener);
+    }
 
     // Use this for initialization
     void Start()
@@ -33,6 +49,7 @@ public class MonsterAttack : MonoBehaviour
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         playerAudio = player.GetComponent<PlayerAudio>();
+        playerGlasses = player.transform.GetChild(0).GetChild(3).gameObject;
     }
 
     // Update is called once per frame
@@ -70,7 +87,7 @@ public class MonsterAttack : MonoBehaviour
     //Improvements: Add smoothing instead of agent.isStopped = true / false.
     private void Attack()
     {
-        if (!chasing || endState)
+        if (!chasing || endState || playerGlasses.activeInHierarchy)
             return;
 
         attacking = true;
