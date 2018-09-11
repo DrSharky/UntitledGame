@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using System;
 
 public class SkeletonExplode : MonoBehaviour
 {
@@ -11,11 +12,12 @@ public class SkeletonExplode : MonoBehaviour
     private WanderingAI wanderScript;
     private Rigidbody rb;
 
-    private UnityAction explodeListener;
+    //private UnityAction explodeListener;
+    private Action explodeListener;
 
     private void Awake()
     {
-        explodeListener = new UnityAction(Boom);
+        explodeListener = new Action(Boom);
     }
 
     private void OnEnable()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System;
 
 public class UIManager : MonoBehaviour
 {
@@ -26,17 +27,6 @@ public class UIManager : MonoBehaviour
     private int speedMulti = 0;
 
     private Rigidbody playerRb;
-    private Transform playerCam;
-    private UnityEvent sunglassesEvent;
-
-    public static bool sunglasses = false;
-    public static bool initSun = false;
-
-    public static void sunglassesEventFired()
-    {
-        sunglasses = true;
-        initSun = true;
-    }
 
 	// Use this for initialization
 	void Start()
@@ -47,9 +37,6 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
 
         playerRb = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
-        if (sunglassesEvent == null)
-            sunglassesEvent = new UnityEvent();
-        sunglassesEvent.AddListener(sunglassesEventFired);
 	}
 
     public void DisplayDialoguePanel(string type)
@@ -73,10 +60,8 @@ public class UIManager : MonoBehaviour
                         NextDialogueLine(skeletonText[dialogueIndex]);
                         dialogueIndex++;
 
-                        if(dialogueIndex == 4)
-                        {
-                            sunglassesEvent.Invoke();
-                        }
+                        if (dialogueIndex == 4)
+                            EventManager.TriggerEvent("Sunglasses");
 
                     }
                     else if (dialogueType == "RatKing")

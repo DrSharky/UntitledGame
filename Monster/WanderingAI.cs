@@ -2,6 +2,7 @@
 using UnityEngine.AI;
 using System.Collections;
 using UnityEngine.Events;
+using System;
 
 public class WanderingAI : MonoBehaviour
 {
@@ -9,7 +10,6 @@ public class WanderingAI : MonoBehaviour
     public float wanderRadius;
     public float wanderTimer;
     public GameObject player;
-    public GameObject playerGlasses;
 
     private float timer;
     private bool chasing = false;
@@ -18,8 +18,10 @@ public class WanderingAI : MonoBehaviour
     private NavMeshAgent agent;
     private Rigidbody rb;
     private Animator anim;
+    private bool sunglassesActive = false;
 
-    private UnityAction explodeListener;
+    private Action explodeListener;
+    private Action sunglassesListener;
 
     //Standard Asset adapting stuff
     private float turnAmt;
@@ -52,7 +54,8 @@ public class WanderingAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         StartCoroutine(WaitForSpawn());
-        explodeListener = new UnityAction(Boom);
+        explodeListener = new Action(Boom);
+        sunglassesListener = new Action(() => { sunglassesActive = !sunglassesActive; });
     }
 
     // Use this for initialization
@@ -60,7 +63,6 @@ public class WanderingAI : MonoBehaviour
     {
         timer = wanderTimer;
         player = GameObject.FindGameObjectWithTag("Player");
-        playerGlasses = player.transform.GetChild(0).GetChild(3).gameObject;
         anim = GetComponent<Animator>();
         m_GroundNormal = new Vector3(0, 1, 0);
 
@@ -68,6 +70,7 @@ public class WanderingAI : MonoBehaviour
         agent.updatePosition = true;
 
         EventManager.StartListening("explode" + gameObject.GetInstanceID(), explodeListener);
+        EventManager.StartListening("SunglassesToggle", sunglassesListener);
     }
 
     private IEnumerator WaitForSpawn()
@@ -94,7 +97,7 @@ public class WanderingAI : MonoBehaviour
             timer = 0;
 
         }
-        else if (chasing && !playerGlasses.activeInHierarchy)
+        else if (chasing && !sunglassesActive)
         {
             agent.SetDestination(player.transform.position - ((player.transform.position - transform.position).normalized*2));
         }
@@ -120,7 +123,7 @@ public class WanderingAI : MonoBehaviour
         move = transform.InverseTransformDirection(move);
         move = Vector3.ProjectOnPlane(move, m_GroundNormal);
         turnAmt = Mathf.Atan2(move.x, move.z);
-        if (chasing && !playerGlasses.activeInHierarchy)
+        if (chasing && !sunglassesActive)
             forwardAmt = move.z;
         else
             forwardAmt = move.z * 0.5f;
@@ -141,7 +144,7 @@ public class WanderingAI : MonoBehaviour
 
     public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask)
     {
-        Vector3 randDirection = Random.insideUnitSphere * dist;
+        Vector3 randDirection = UnityEngine.Random.insideUnitSphere * dist;
         randDirection += origin;
         NavMeshHit navHit;
         NavMesh.SamplePosition(randDirection, out navHit, dist, layermask);

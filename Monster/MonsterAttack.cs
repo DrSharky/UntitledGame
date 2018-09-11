@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Events;
+using System;
 
 public class MonsterAttack : MonoBehaviour
 {
     public bool attacking = false;
     public int damage = 10;
     public GameObject player;
-    public GameObject playerGlasses;
 
+    private bool sunglassesActive = false;
     private bool inRange = false;
     private bool chasing = false;
     private bool endState = false;
@@ -22,22 +22,25 @@ public class MonsterAttack : MonoBehaviour
     //private MonsterHealth monsterHealth;
 
     private int instanceID;
-    private UnityAction explodeListener;
-    private UnityAction chaseListener;
+    private Action explodeListener;
+    private Action chaseListener;
+    private Action sunglassesListener;
 
     private Coroutine playDamage = null;
 
     private void Awake()
     {
         instanceID = gameObject.GetInstanceID();
-        explodeListener = new UnityAction(Boom);
-        chaseListener = new UnityAction(OnStartChase);
+        explodeListener = new Action(Boom);
+        chaseListener = new Action(OnStartChase);
+        sunglassesListener = new Action(() => { sunglassesActive = !sunglassesActive; });
     }
 
     private void OnEnable()
     {
         EventManager.StartListening("explode" + instanceID, explodeListener);
         EventManager.StartListening("chase" + instanceID, chaseListener);
+        EventManager.StartListening("SunglassesToggle", sunglassesListener);
     }
 
     // Use this for initialization
@@ -49,7 +52,6 @@ public class MonsterAttack : MonoBehaviour
         anim = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
         playerAudio = player.GetComponent<PlayerAudio>();
-        playerGlasses = player.transform.GetChild(0).GetChild(3).gameObject;
     }
 
     // Update is called once per frame
@@ -82,12 +84,11 @@ public class MonsterAttack : MonoBehaviour
         }
     }
 
-
     //Could use some work
     //Improvements: Add smoothing instead of agent.isStopped = true / false.
     private void Attack()
     {
-        if (!chasing || endState || playerGlasses.activeInHierarchy)
+        if (!chasing || endState || sunglassesActive)
             return;
 
         attacking = true;

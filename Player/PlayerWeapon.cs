@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.Events;
+using System;
 
 public class PlayerWeapon : MonoBehaviour
 {
@@ -14,8 +15,6 @@ public class PlayerWeapon : MonoBehaviour
     public List<GameObject> weapons;
     public List<GameObject> acquiredWeapons;
 
-    public GameObject sunglasses;
-
     private int currentWeapon;
     private Animator currentAnim;
     private float shootCooldown = 1.0f;
@@ -26,9 +25,16 @@ public class PlayerWeapon : MonoBehaviour
     private GameObject fireballProjectile;
     private bool mouseButtonUp = true;
     private bool gotSunglasses = false;
+    private Action<string> giveWeaponListener;
 
-    private void Start()
+    void Awake()
     {
+        giveWeaponListener = new Action<string>(GiveWeapon);
+    }
+    void Start()
+    {
+        EventManager.StartListening("GiveWeapon", giveWeaponListener);
+
         acquiredWeapons = new List<GameObject>();
         if (debug)
         {
@@ -39,21 +45,19 @@ public class PlayerWeapon : MonoBehaviour
             currentWeapon = -1;
     }
 
-    public void GiveWeapon(GameObject weapon)
+    public void GiveWeapon(string weapon)
     {
-        GameObject weaponInList = weapons.Where(x => x.name == weapon.name).FirstOrDefault();
+        GameObject weaponInList = weapons.Where(x => x.name == weapon).FirstOrDefault();
         if (weaponInList != null)
         {
-            if (acquiredWeapons.Where(x => x.name == weapon.name).FirstOrDefault() == null)
+            if (acquiredWeapons.Where(x => x.name == weapon).FirstOrDefault() == null)
             {
                 acquiredWeapons.Add(weaponInList);
                 SetActiveWeapon(weaponInList);
             }
         }
         else
-        {
             Debug.LogWarning("Weapon hasn't been added to possible pickup list! Check the weapon names.");
-        }
     }
 
     private void Update()
@@ -85,19 +89,6 @@ public class PlayerWeapon : MonoBehaviour
         }
         if (Input.GetMouseButtonUp(0))
             mouseButtonUp = true;
-
-        if (Input.GetKeyDown(KeyCode.Q) && UIManager.sunglasses)
-        {
-            if (sunglasses.activeInHierarchy)
-                sunglasses.SetActive(false);
-            else
-                sunglasses.SetActive(true);
-        }
-        if (UIManager.initSun)
-        {
-            sunglasses.SetActive(true);
-            UIManager.initSun = false;
-        }
     }
 
     private void SetActiveWeapon(GameObject weapon)
